@@ -38,7 +38,7 @@ jobs:
       - run: yarn install --network-timeout 3600000
       - run: pod install
         working-directory: ./ios
-      - run: bundle exec ios build_app
+      - run: bundle exec fastlane ios build_app
         working-directory: ./ios
       - name: tail build log
         if: always()
