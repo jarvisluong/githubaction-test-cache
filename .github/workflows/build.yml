@@ -36,4 +36,12 @@ jobs:
 
       # MacOS runner on github actions sometimes timeout during yarn install. Adding this for additional build reliability
       - run: yarn install --network-timeout 3600000
+      - run: pod install
+        working-directory: ./ios
+      - run: bundle exec ios build_app
+        working-directory: ./ios
+      - name: tail build log
+        if: always()
+        run: tail -500 logs/*.log
+        working-directory: ./ios
 
