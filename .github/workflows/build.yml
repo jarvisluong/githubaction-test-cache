@@ -4,9 +4,36 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch: {}
 
 jobs:
   run:
     runs-on: macos-latest
     steps:
-      - run: xcodebuild -version
+      - uses: actions/checkout@v2
+      - name: Setup Ruby for fastlane
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '2.7'
+      - name: Install Gems
+        run: bundle install
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: |
+            ${{ steps.yarn-cache-dir-path.outputs.dir }}
+            **/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Check Yarn cache
+        run: echo "Yarn cache ${{ steps.yarn-cache.outputs.cache-hit }}"
+
+      # MacOS runner on github actions sometimes timeout during yarn install. Adding this for additional build reliability
+      - run: yarn install --network-timeout 3600000
+

@@ -1,0 +1,21 @@
+default_platform(:ios)
+
+platform :ios do
+
+  desc "Build app and publish to TestFlight"
+  lane :testflight_release do
+    create_keychain(
+      name: "Baxter_Temporary",
+      default_keychain: true,
+      unlock: true,
+      password: "password",
+      timeout: 6400,
+      lock_when_sleeps: false
+    )
+    match(type: "appstore", readonly: is_ci, keychain_name: "Baxter_Temporary", keychain_password: "password")
+    gym(scheme: "Baxter", silent: is_ci, suppress_xcode_output: is_ci, buildlog_path: './logs')
+    upload_to_testflight(api_key_path: "./appstoreconnect_apikey.json")
+    delete_keychain(name: "Baxter_Temporary")
+  end
+
+end
